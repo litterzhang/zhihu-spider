@@ -25,29 +25,34 @@ class ZhihuSpider(object):
 		else:
 			self.login_in_terminal()
 
-	@staticmethod
-	def _get_captcha_url():
-		return Captcha_URL_Prefix + str(int(time.time() * 1000))
-
-	def get_captcha(self):
+	def get_captcha_and_xsrf(self):
 		"""获取验证码数据。
 
-		:return: 验证码图片数据。
+		:return: 验证码和xsrf图片数据。
 		:rtype: bytes
 		"""
 		# some unbelievable zhihu logic
 		self._session.get(Zhihu_URL)
+
+		#get _xsrf in cookies
+		xsrf = self._session.cookies.get_dict().get('_xsrf', '')
+
 		# data = {'email': '', 'password': '', 'remember_me': 'true'}
 		# self._session.post(Login_URL, data=data)
 
-		r = self._session.get(self._get_captcha_url())
-		return r.content
+		#get captcha from generate url
+		captcha_url = Captcha_URL_Prefix + str(int(time.time() * 1000))
+		r = self._session.get(captcha_url)
 
-	def login(self, email, password, captcha):
+		return r.content, xsrf
+
+	def login(self, account_type, account, password, xsrf, captcha):
 		"""登陆知乎.
 
-		:param str email: 邮箱
+		:param int account_type: 用户名类型
+		:param str account: 用户名(邮箱或者手机号)
 		:param str password: 密码
+		:param str xsrf: _xsrf
 		:param str captcha: 验证码
 		:return:
 			======== ======== ============== ====================
@@ -60,10 +65,18 @@ class ZhihuSpider(object):
 
 		:rtype: (int, str, str)
 		"""
-		data = {'email': email, 'password': password, 'remember_me': 'true', 'captcha': captcha}
-		r = self._session.post(Login_URL, data=data)
 
-		#print(r.json())
+		# create login url and data
+		login_url = Login_URL_EMAIL
+		if account_type is 0:
+			login_url = Login_URL_EMAIL
+			data = {'email': account, 'password': password, '_xsrf': xsrf, 'remember_me': 'true', 'captcha': captcha}
+		else:
+			login_url = Login_URL_PHONE
+			data = {'phone_num': account, 'password': password, '_xsrf': xsrf, 'remember_me': 'true', 'captcha': captcha}
+		r = self._session.post(login_url, data=data)
+
+		# get login result
 		j = r.json()
 		code = int(j['r'])
 		message = j['msg'] if code == 0 else j['data']
@@ -71,7 +84,25 @@ class ZhihuSpider(object):
 		return code, message, cookies_str
 
 	def login_with_cookies(self, cookies):
-		pass
+		"""使用cookies文件或字符串登录知乎
+
+		:param str cookies:
+			============== ===========================
+			参数形式       作用
+			============== ===========================
+			文件名         将文件内容作为cookies字符串
+			cookies字符串  直接提供cookies字符串
+			============== ===========================
+		:return: 无
+		:rtype: None
+		"""
+		if os.path.isfile(cookies):
+			with open(cookies) as f:
+				cookies = f.read()
+				cookies_dict = json.loads(cookies)
+				self._session.cookies.update(cookies_dict)
+		else:
+			print('cookies file is not correct')
 
 	def login_in_terminal(self, cookies_file='cookies'):
 		"""不使用cookies，在终端中根据提示登陆知乎
@@ -81,10 +112,27 @@ class ZhihuSpider(object):
 		"""
 		print('====== zhihu login =====')
 
-		email = input('email: ')
+		account = input('account: ')
 		password = input('password: ')
 
-		captcha_data = self.get_captcha()
+		r_phone = re_phone.match(account)
+		r_email = re_email.match(account)
+
+		# check what the account is
+		account_type = 0
+		if r_email:
+			account_type = 0
+		elif r_phone:
+			account_type = 1
+		else:
+			account_type = 2
+
+		if account_type is 2:
+			print('account check error[local]')
+			return None
+
+
+		captcha_data, xsrf = self.get_captcha_and_xsrf()
 		with open('captcha.gif', 'wb') as f:
 			f.write(captcha_data)
 
@@ -94,7 +142,7 @@ class ZhihuSpider(object):
 
 		print('====== logging.... =====')
 
-		code, msg, cookies = self.login(email, password, captcha)
+		code, msg, cookies = self.login(account_type, account, password, xsrf, captcha)
 
 		if code == 0:
 			print('login successfully')
@@ -107,7 +155,6 @@ class ZhihuSpider(object):
 				print('can\'t create cookies.')
 		else:
 			print('login failed, reason: {0}'.format(msg))
-		
 	
 		return cookies
 
