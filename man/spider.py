@@ -158,6 +158,8 @@ class ZhihuSpider(object):
 	
 		return cookies
 
-
+	def load(self, url):
+		url_t, url = url_type(url)
+		pass
 		
 

@@ -5,8 +5,8 @@
 
 __author__ = 'litter_zhang'
 
-from spider import ZhihuSpider
+from common import *
 
-if __name__=='__main__':
-	spider = ZhihuSpider()
-	
+url = 'https://www.zhihu.com/question/36861786'
+
+print(url_type(url))
