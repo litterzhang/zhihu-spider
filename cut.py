@@ -11,6 +11,7 @@ __author__ = 'litter_zhang'
 # print('/'.join(seg_list))
 
 import jieba.posseg as pseg
+import man.common
 
 words = pseg.cut('禁止包办、买卖婚姻和其他干涉婚姻自由的行为。')
 

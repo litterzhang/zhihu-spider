@@ -50,4 +50,4 @@ def url_type(url):
 	elif re_search_url.match(url):
 		return 'search', url
 	else:
-		return 'none', url
+		return None, url

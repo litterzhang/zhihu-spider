@@ -5,9 +5,11 @@
 
 __author__ = 'litter_zhang'
 
+import os
 import time
 import json
 import requests
+import importlib
 
 from common import *
 
@@ -160,6 +162,14 @@ class ZhihuSpider(object):
 
 	def load(self, url):
 		url_t, url = url_type(url)
-		pass
+		
+		if not url_t:
+			print('url uncorrect')
+			return None
+		url_t_module = importlib.import_module(url_t)
+
+		url_t_module.printer()
+
+
 		
 

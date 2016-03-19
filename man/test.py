@@ -5,8 +5,8 @@
 
 __author__ = 'litter_zhang'
 
-from common import *
+from spider import ZhihuSpider
 
-url = 'https://www.zhihu.com/question/36861786'
+spider = ZhihuSpider(cookies='cookies')
 
-print(url_type(url))
+spider.load('https://www.zhihu.com/question/41450532#answer-31952471')
