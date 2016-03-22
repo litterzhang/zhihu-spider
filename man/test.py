@@ -9,4 +9,4 @@ from spider import ZhihuSpider
 
 spider = ZhihuSpider(cookies='cookies')
 
-spider.load('https://www.zhihu.com/question/41450532#answer-31952471')
+spider.load('https://www.zhihu.com/question/19975029/')

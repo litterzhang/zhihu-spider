@@ -168,8 +168,7 @@ class ZhihuSpider(object):
 			return None
 		url_t_module = importlib.import_module(url_t)
 
-		url_t_module.printer()
-
-
+		url_t_ins = getattr(url_t_module, url_t.capitalize())(url, self._session)
+		url_t_ins.load()
 		
 

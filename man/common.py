@@ -7,6 +7,13 @@ __author__ = 'litter_zhang'
 
 import re
 
+from bs4 import BeautifulSoup as _Bs
+try:
+    __import__('lxml')
+    BeautifulSoup = lambda makeup: _Bs(makeup, 'lxml')
+except ImportError:
+    BeautifulSoup = lambda makeup: _Bs(makeup, 'html.parser')
+
 Default_Header = {
 	'X-Requested-With': 'XMLHttpRequest',
 	'Referer': 'http://www.zhihu.com',
@@ -22,6 +29,11 @@ re_email = re.compile(r'^.*@.*\..*$')
 re_phone = re.compile(r'^[0-9]{11}$')
 
 re_question_url = re.compile(r'^https?://www\.zhihu\.com/question/(\d+)/?')
+re_question_url_main = re.compile(r'^https?://www\.zhihu\.com/question/(\d+)[^/]*/?$')
+re_question_url_followers = re.compile(r'^https?://www\.zhihu\.com/question/(\d+)/followers/?$')
+re_question_url_log = re.compile(r'^https?://www\.zhihu\.com/question/(\d+)/log/?$')
+re_question_url_answer = re.compile(r'^https?://www\.zhihu\.com/question/(\d+)/answer/(\d)+/?$')
+
 re_people_url = re.compile(r'^https?://www\.zhihu\.com/people/([^/]+)/?')
 re_collection_url = re.compile(r'^https?://www\.zhihu\.com/collection/(\d+)/?')
 re_zhuanlan_url = re.compile(r'^https?://zhuanlan\.zhihu\.com/([^/]+)/?')
