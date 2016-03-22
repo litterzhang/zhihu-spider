@@ -46,10 +46,13 @@ class Question(object):
 		# 	f.write(r.text)
 		
 		question_id = soup.find(id='zh-single-question-page').attrs['data-urltoken']
+		
 		followers_area = soup.find(attrs={'class': 'zh-question-followers-sidebar'})
 		followers_url = urljoin(self.url, followers_area.find(attrs={'class': 'zg-gray-normal'}).find('a').attrs['href'])
 		followers_num = followers_area.find(attrs={'class': 'zg-gray-normal'}).find('strong').text
-		print(followers_num)
+		followers_users = [{'username': it.attrs['title'], 'url': urljoin(self.url, it.attrs['href']), 'avatar': it.find('img').attrs['src']} for it in followers_area.find(attrs={'class': 'list'}).find_all('a')]
+
+		print(followers_users)
 
 	def load_question_followers(self):
 		pass
